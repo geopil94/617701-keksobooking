@@ -174,6 +174,6 @@ var onCloseKeydown = function (evt) {
   }
 };
 
-map.addEventListener('keydown', onCloseKeydown);
+document.addEventListener('keydown', onCloseKeydown);
 
 
