@@ -1,6 +1,7 @@
 'use strict';
 
-document.querySelector('.map').classList.remove('map--faded');
+var map = document.querySelector('.map');
+var filters = map.querySelector('.map__filters-container');
 
 var authorAvatarArr = [1, 2, 3, 4, 5, 6, 7, 8];
 var offerTitleArr = ['Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец', 'Маленький ужасный дворец',
@@ -12,7 +13,7 @@ var offerFeaturesArr = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', '
 var offerPhotosArr = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
   'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
 
-var getRandomNumber = function(min, max) {
+var getRandomNumber = function (min, max) {
   return min + Math.floor(Math.random() * (max - min));
 };
 
@@ -27,13 +28,13 @@ var randomOfferCheckInArr = offerCheckInArr.sort(compareRandom);
 var randomOfferCheckOutArr = offerCheckOutArr.sort(compareRandom);
 var randomOfferPhotosArr = offerPhotosArr.sort(compareRandom);
 
-var getRandomFeatures = function() {
+var getRandomFeatures = function () {
   return offerFeaturesArr.slice(0, getRandomNumber(1, offerFeaturesArr.length - 1));
 };
 
 var advertisementArr = [];
 var AMOUNT_OF_ADVERTISEMENTS = 8;
-var fillArray = function(array) {
+var fillArray = function (array) {
   for (var i = 1; i <= AMOUNT_OF_ADVERTISEMENTS; i++) {
     var Advertisement = {
       author: {
@@ -66,25 +67,35 @@ var templateArticle = document.querySelector('template').content.querySelector('
 var templateButton = document.querySelector('template').content.querySelector('.map__pin');
 var mapPins = document.querySelector('.map__pins');
 
-var createPin = function (pins){
+var createPin = function (pins) {
   var mapPinFragment = document.createDocumentFragment();
   for (var i = 0; i < pins.length; i++) {
     var mapPin = templateButton.cloneNode(true);
     mapPin.style = 'left: ' + pins[i].location.x + 'px; top: ' + pins[i].location.y + 'px;';
     mapPin.querySelector('img').src = pins[i].author.avatar;
     mapPin.querySelector('img').alt = pins[i].offer.title;
+    mapPin.data = pins[i];
+    mapPin.tabIndex = i;
+    mapPin.addEventListener('click', function (evt) {
+      var pin = evt.target;
+      if (pin.tagName === 'IMG') {
+        pin = pin.parentElement;
+      }
+      showCard(pin.data);
+    });
+
     mapPinFragment.appendChild(mapPin);
   }
   mapPins.appendChild(mapPinFragment);
 };
-createPin(advertisementArr);
+
 
 var addTextContent = function (whatToAdd, whereToAdd) {
-  return whereToAdd.textContent = whatToAdd;
+  whereToAdd.textContent = whatToAdd;
 };
 
-var addSrc = function(whatToAdd, whereToAdd){
-  return whereToAdd.src = whatToAdd;
+var addSrc = function (whatToAdd, whereToAdd) {
+  whereToAdd.src = whatToAdd;
 };
 
 var Types = {
@@ -102,16 +113,23 @@ var Types = {
   }
 };
 
+var removePopup = function (popup) {
+  map.removeChild(popup);
+};
+
 var showCard = function (currentOffer) {
+  var popup = map.querySelector('.popup');
+  if (popup) {
+    removePopup(popup);
+  }
   var mapCard = templateArticle.cloneNode(true);
+  mapCard.querySelector('.popup__close').tabIndex = 0; // не понятно почему tab не ставится сразу на окно поп-апа, хотя табИндекс действительно 0
   addTextContent(currentOffer.offer.title, mapCard.querySelector('.popup__title'));
   addTextContent(currentOffer.offer.address, mapCard.querySelector('.popup__text--address'));
   addTextContent(currentOffer.offer.price + ' ₽/ночь', mapCard.querySelector('.popup__text--price'));
   addTextContent(Types[currentOffer.offer.type].ru, mapCard.querySelector('.popup__type'));
-  addTextContent(currentOffer.offer.rooms + ' комнаты для ' + currentOffer.offer.guests + ' гостей',
-    mapCard.querySelector('.popup__text--capacity'));
-  addTextContent('Заезд после ' + advertisementArr[0].offer.checkin + ', выезд до ' + currentOffer.offer.checkout,
-    mapCard.querySelector('.popup__text--time'));
+  addTextContent(currentOffer.offer.rooms + ' комнаты для ' + currentOffer.offer.guests + ' гостей', mapCard.querySelector('.popup__text--capacity'));
+  addTextContent('Заезд после ' + advertisementArr[0].offer.checkin + ', выезд до ' + currentOffer.offer.checkout, mapCard.querySelector('.popup__text--time'));
   var featuresContainer = mapCard.querySelector('.popup__features');
   featuresContainer.innerHTML = '';
   for (i = 0; i < currentOffer.offer.features.length; i++) {
@@ -127,6 +145,35 @@ var showCard = function (currentOffer) {
     mapCard.querySelector('.popup__photos').appendChild(img);
   }
   addSrc(currentOffer.author.avatar, mapCard.querySelector('.popup__avatar'));
-  document.querySelector('.map').insertBefore(mapCard, document.querySelector('.map__filters-container'));
+
+  map.insertBefore(mapCard, filters);
 };
-showCard(advertisementArr[0]);
+
+
+var mainPin = mapPins.querySelector('.map__pin--main');
+
+mainPin.addEventListener('mouseup', function () {
+  map.classList.remove('map--faded');
+  createPin(advertisementArr);
+});
+
+map.addEventListener('click', function (evt) {
+  if (evt.target.classList.contains('popup__close')) {
+    var popup = map.querySelector('.popup');
+    removePopup(popup);
+  }
+});
+
+var onCloseKeydown = function (evt) {
+  var popup = map.querySelector('.popup');
+  if (evt.keyCode === 27) {
+    removePopup(popup);
+  }
+  if (!popup) {
+    map.removeEventListener('keydown', onCloseKeydown);
+  }
+};
+
+document.addEventListener('keydown', onCloseKeydown);
+
+
