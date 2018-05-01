@@ -192,7 +192,6 @@ var type = document.querySelector('#type');
 var roomNumber = document.querySelector('#room_number');
 var capacity = document.querySelector('#capacity');
 var adFormSubmit = document.querySelector('.ad-form__submit');
-var adForm = document.querySelector('.ad-form');
 var title = document.querySelector('#title');
 
 var TypePlaceholders = {
@@ -238,25 +237,35 @@ var onTimeOutChange = function () {
 timeIn.addEventListener('change', onTimeInChange);
 timeOut.addEventListener('change', onTimeOutChange);
 
+var MAX_PRICE = 1000000;
+
 var onAdFormClick = function (evt) {
   var stopSubmit = false;
   if (title.value.length < 30) {
     title.setCustomValidity('Длина меньше 30 символов!');
     title.style.border = '2px solid red';
     stopSubmit = true;
+  } else {
+    title.setCustomValidity('');
+
   }
   var minPrice = TypePlaceholders[type.value];
-  if (price.value < parseInt(minPrice, 10)) {
+  if (price.value < parseInt(minPrice, 10) || price.value > MAX_PRICE) {
     price.style.border = '2px solid red';
-    price.setCustomValidity('Цена ниже минимально возможной!');
+    price.setCustomValidity('Цена указана неверно!');
     stopSubmit = true;
+  } else {
+    price.setCustomValidity('');
   }
   if (stopSubmit) {
     evt.preventDefault();
-    setTimeout(function () {
+    adForm.addEventListener('change', function () {
       price.style.border = 'none';
       title.style.border = 'none';
-    }, 4000);
+    });
+  }
+  if (!stopSubmit) {
+    adFormSubmit.removeEventListener('click', onAdFormClick);
   }
 };
 
