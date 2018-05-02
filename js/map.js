@@ -259,9 +259,11 @@ var onAdFormClick = function (evt) {
   }
   if (stopSubmit) {
     evt.preventDefault();
-    adForm.addEventListener('change', function () {
+    adForm.addEventListener('input', function () {
       price.style.border = 'none';
       title.style.border = 'none';
+      title.setCustomValidity('');
+      price.setCustomValidity('');
     });
   }
 };
