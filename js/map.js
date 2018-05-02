@@ -264,9 +264,6 @@ var onAdFormClick = function (evt) {
       title.style.border = 'none';
     });
   }
-  if (!stopSubmit) {
-    adFormSubmit.removeEventListener('click', onAdFormClick);
-  }
 };
 
 adFormSubmit.addEventListener('click', onAdFormClick);
