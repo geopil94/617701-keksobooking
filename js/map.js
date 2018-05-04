@@ -3,6 +3,13 @@
 var map = document.querySelector('.map');
 var filters = map.querySelector('.map__filters-container');
 var adForm = document.querySelector('.ad-form');
+var address = document.querySelector('#address');
+var MIN_MAP_X_COORDS = 300;
+var MAX_MAP_X_COORDS = 900;
+var MIN_MAP_Y_COORDS = 150;
+var MAX_MAP_Y_COORDS = 500;
+var MAIN_PIN_X_HALF_SIZE = 20;
+var MAIN_PIN_Y_SIZE = 44;
 
 var authorAvatarArr = [1, 2, 3, 4, 5, 6, 7, 8];
 var offerTitleArr = ['Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец', 'Маленький ужасный дворец',
@@ -42,12 +49,12 @@ var fillArray = function (array) {
         avatar: 'img/avatars/user0' + randomAuthorAvatarArr[i - 1] + '.png'
       },
       location: {
-        x: getRandomNumber(300, 900),
-        y: getRandomNumber(150, 500)
+        x: getRandomNumber(MIN_MAP_X_COORDS, MAX_MAP_X_COORDS),
+        y: getRandomNumber(MIN_MAP_Y_COORDS, MAX_MAP_Y_COORDS)
       },
       offer: {
         title: randomOfferTitleArr[i - 1],
-        address: getRandomNumber(300, 900) + ', ' + getRandomNumber(150, 500),
+        address: getRandomNumber(MIN_MAP_X_COORDS, MAX_MAP_X_COORDS) + ', ' + getRandomNumber(MIN_MAP_Y_COORDS, MAX_MAP_Y_COORDS),
         price: getRandomNumber(1000, 1000000),
         type: randomOfferTypeArr[getRandomNumber(0, 3)],
         rooms: getRandomNumber(1, 5),
@@ -150,10 +157,6 @@ var showCard = function (currentOffer) {
   map.insertBefore(mapCard, filters);
 };
 
-var onMainPinClick = function (evt) {
-  document.querySelector('#address').value = evt.clientX + ', ' + evt.clientY;
-};
-
 var mainPin = mapPins.querySelector('.map__pin--main');
 
 mainPin.addEventListener('mouseup', function () {
@@ -162,6 +165,57 @@ mainPin.addEventListener('mouseup', function () {
   createPin(advertisementArr);
 });
 
+mainPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+
+  var startCoords = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+
+    var shift = {
+      x: startCoords.x - moveEvt.clientX,
+      y: startCoords.y - moveEvt.clientY
+    };
+
+    startCoords = {
+      x: moveEvt.clientX,
+      y: moveEvt.clientY
+    };
+
+    mainPin.style.top = (mainPin.offsetTop - shift.y) + 'px';
+    mainPin.style.left = (mainPin.offsetLeft - shift.x) + 'px';
+    if ((mainPin.offsetTop - shift.y) > MAX_MAP_Y_COORDS) {
+      mainPin.style.top = MAX_MAP_Y_COORDS + 'px';
+    }
+    if ((mainPin.offsetTop - shift.y) < MIN_MAP_Y_COORDS) {
+      mainPin.style.top = MIN_MAP_Y_COORDS + 'px';
+    }
+    if ((mainPin.offsetLeft - shift.x) > MAX_MAP_X_COORDS) {
+      mainPin.style.left = MAX_MAP_X_COORDS + 'px';
+    }
+    if ((mainPin.offsetLeft - shift.x) < MIN_MAP_X_COORDS) {
+      mainPin.style.left = MIN_MAP_X_COORDS + 'px';
+    }
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
+
+var onMainPinClick = function () {
+  address.value = (parseInt(mainPin.style.left.slice(0, -2), 10) + MAIN_PIN_X_HALF_SIZE) + ', ' + (parseInt(mainPin.style.top.slice(0, -2), 10) + MAIN_PIN_Y_SIZE);
+};
 mainPin.addEventListener('click', onMainPinClick);
 
 map.addEventListener('click', function (evt) {
