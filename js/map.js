@@ -3,7 +3,7 @@
 window.mainPin.addEventListener('mouseup', function () {
   window.map.classList.remove('map--faded');
   window.adForm.classList.remove('ad-form--disabled');
-  window.common.createPin(window.advertisementArr);
+  window.download('GET', window.common.onLoad, window.common.onError);
 });
 
 window.mainPin.addEventListener('mousedown', function (evt) {

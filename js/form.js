@@ -1,10 +1,11 @@
 'use strict';
 
 (function () {
-  var timeIn = document.querySelector('#timein');
-  var timeOut = document.querySelector('#timeout');
-  var roomNumber = document.querySelector('#room_number');
-  var capacity = document.querySelector('#capacity');
+  var formElement = document.querySelector('.ad-form');
+  var timeIn = formElement.querySelector('#timein');
+  var timeOut = formElement.querySelector('#timeout');
+  var roomNumber = formElement.querySelector('#room_number');
+  var capacity = formElement.querySelector('#capacity');
   var TypePlaceholders = {
     'bungalo': '0',
     'flat': '1000',
@@ -79,6 +80,13 @@
   };
 
   window.adFormSubmit.addEventListener('click', onAdFormClick);
+  formElement.addEventListener('submit', function(evt) {
+    evt.preventDefault();
+    var data = new FormData();
+    window.download('POST', window.common.onLoad, window.common.onError, data);
+  });
 })();
+
+
 
 

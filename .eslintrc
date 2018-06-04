@@ -5,3 +5,9 @@ env:
 
 extends:
   "htmlacademy/es5"
+
+module.exports = {
+    rules: {
+        'no-console': 'off',
+    },
+};

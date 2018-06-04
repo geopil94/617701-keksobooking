@@ -102,6 +102,37 @@ window.common = (function () {
         mapPinFragment.appendChild(mapPin);
       }
       window.mapPins.appendChild(mapPinFragment);
+    },
+    displayError: function (opacity) {
+      var errorWindow = document.createElement('div');
+      errorWindow.style.opacity = opacity;
+      errorWindow.style.display = 'block';
+      errorWindow.style.boxSizing = 'content-box';
+      errorWindow.style.position = 'absolute';
+      errorWindow.style.top = '1525px';
+      errorWindow.style.left = '240px';
+      errorWindow.style.fontSize = '20px';
+      errorWindow.style.fontWeight = '700';
+      errorWindow.style.height = '60px';
+      errorWindow.style.width = '206px';
+      errorWindow.style.border = '4px solid #ffaa99';
+      errorWindow.style.borderRadius = '8px';
+      errorWindow.style.backgroundColor = 'red';
+      errorWindow.style.paddingTop = '5px';
+      errorWindow.style.textAlign = 'center';
+      errorWindow.innerHTML = '<span> Внимание! Что-то пошло не так! </span>';
+      document.body.appendChild(errorWindow);
+    },
+    onLoad: function(data) {
+      for (var i = 0; i <= data.length; i++) {
+        window.common.createPin(data);
+      }
+      return console.log(data); // не забыть убрать консоль лог
+    },
+    onError: function(message) {
+    return console.error(message);
     }
   };
 })();
+
+
